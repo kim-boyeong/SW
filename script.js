@@ -3,28 +3,39 @@
         title: "커피",
         description: "사이즈와 온도를 선택할 수 있습니다.",
         items: [
-          { category: "커피", name: "아메리카노", price: 3000, kind: "cup" },
-          { category: "커피", name: "라떼", price: 4000, kind: "latte" },
-          { category: "커피", name: "콜드브루", price: 4500, kind: "cold" }
+          { category: "커피", name: "아메리카노", price: 3000, image: "./assets/menu/americano.jpg" },
+          { category: "커피", name: "라떼", price: 4000, image: "./assets/menu/latte.jpg" },
+          { category: "커피", name: "콜드브루", price: 4500, image: "./assets/menu/coldbrew.jpg" }
         ]
       },
       noncoffee: {
         title: "논커피",
         description: "스무디는 ICE만 선택 가능합니다.",
         items: [
-          { category: "논커피", name: "스무디", price: 5000, iceOnly: true, kind: "smoothie" },
-          { category: "논커피", name: "아이스티", price: 3500, kind: "tea" },
-          { category: "논커피", name: "초코라떼", price: 4500, kind: "choco" }
+          { category: "논커피", name: "스무디", price: 5000, iceOnly: true, image: "./assets/menu/smoothie.jpg" },
+          { category: "논커피", name: "아이스티", price: 3500, image: "./assets/menu/icetea.jpg" },
+          { category: "논커피", name: "초코라떼", price: 4500, image: "./assets/menu/choco-latte.jpg" }
         ]
       },
       dessert: {
         title: "디저트",
         description: "디저트는 옵션 없이 수량만 선택합니다.",
         items: [
-          { category: "디저트", name: "치즈케이크", price: 5500, dessert: true, kind: "cake" },
-          { category: "디저트", name: "두쫀쿠", price: 4000, dessert: true, kind: "cookie" },
-          { category: "디저트", name: "버터떡", price: 3500, dessert: true, kind: "ricecake" }
+          { category: "디저트", name: "치즈케이크", price: 5500, dessert: true, image: "./assets/menu/cheesecake.jpg" },
+          { category: "디저트", name: "두쫀쿠", price: 4000, dessert: true, image: "./assets/menu/cookie.jpg" },
+          { category: "디저트", name: "버터떡", price: 3500, dessert: true, image: "./assets/menu/ricecake.jpg" }
         ]
+      }
+    };
+
+    const paymentQrImages = {
+      "카카오페이": {
+        src: "./assets/qr/kakaopay-qr.png",
+        alt: "카카오페이 데모 QR 이미지"
+      },
+      "네이버페이": {
+        src: "./assets/qr/naverpay-qr.png",
+        alt: "네이버페이 데모 QR 이미지"
       }
     };
 
@@ -48,41 +59,15 @@
     const receiptDialog = byId("receiptDialog");
     const quantityInput = byId("quantity");
 
-    function menuSvg(kind) {
-      const colors = {
-        cup: ["#5d4037", "#fff8ee"],
-        latte: ["#b77a45", "#fff4d8"],
-        cold: ["#2d7d74", "#d8efe7"],
-        smoothie: ["#9f2d55", "#f8d7e2"],
-        tea: ["#c8861a", "#fff4d8"],
-        choco: ["#6b3f2a", "#f3dcc8"],
-        cake: ["#c8861a", "#fff4d8"],
-        cookie: ["#8f5b31", "#f3dcc8"],
-        ricecake: ["#2d7d74", "#edf6f3"]
-      }[kind] || ["#5d4037", "#fff8ee"];
-
-      if (["cake", "cookie", "ricecake"].includes(kind)) {
-        return `<svg class="drink-icon" viewBox="0 0 100 100" aria-hidden="true">
-          <rect x="16" y="52" width="68" height="24" rx="6" fill="${colors[0]}"></rect>
-          <path d="M21 52 h58 l-10 -24 h-38z" fill="${colors[1]}" stroke="${colors[0]}" stroke-width="5"></path>
-          <circle cx="50" cy="39" r="7" fill="#9f2d55"></circle>
-        </svg>`;
-      }
-
-      return `<svg class="drink-icon" viewBox="0 0 100 100" aria-hidden="true">
-        <path d="M30 24 h40 l7 56 h-54z" fill="${colors[1]}" stroke="${colors[0]}" stroke-width="7"></path>
-        <path d="M32 42 h36 l-4 26 h-28z" fill="${colors[0]}" opacity="0.9"></path>
-        <path d="M35 18 h30" stroke="${colors[0]}" stroke-width="7" stroke-linecap="round"></path>
-      </svg>`;
-    }
-
     function renderMenu() {
       const data = categories[currentCategory];
       byId("categoryTitle").textContent = data.title;
       byId("categoryDescription").textContent = data.description;
       menuList.innerHTML = data.items.map((item, index) => `
         <article class="menu-card">
-          <div class="menu-art">${menuSvg(item.kind)}</div>
+          <div class="menu-art">
+            <img src="${item.image}" alt="${item.name} 메뉴 이미지" loading="lazy">
+          </div>
           <div class="menu-info">
             <h3>${item.name}</h3>
             <p class="price">${won(item.price)}</p>
@@ -238,7 +223,12 @@
       document.querySelectorAll(".payment-option").forEach(button => {
         button.classList.toggle("active", button.dataset.payment === selectedPayment);
       });
-      byId("qrBox").classList.toggle("show", selectedPayment !== "카드 결제");
+      const qrBox = byId("qrBox");
+      const qrImage = paymentQrImages[selectedPayment];
+      qrBox.classList.toggle("show", Boolean(qrImage));
+      qrBox.innerHTML = qrImage
+        ? `<img src="${qrImage.src}" alt="${qrImage.alt}"><span>${selectedPayment} QR 결제 안내</span>`
+        : "";
     }
 
     function completePayment() {
